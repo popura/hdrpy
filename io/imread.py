@@ -173,7 +173,28 @@ class HdrReader():
             img = np.multiply(tmpdata[:,:,0:3], expo[:,:,np.newaxis])
 
         if img is None:
-            raise Exception('Failed to load file "{0}"'.format(filename))
+            raise Exception('Failed to load file "{0}"'.format(path))
 
         return img
         
+class PfmReader():
+    def __init__(self, ):
+        return
+
+    def imread(self, path):
+        img = None
+        with open(path, 'rb') as f:
+            f.readline()
+            w, h = f.readline().decode('ascii').strip().split(' ')
+            w = int(w)
+            h = int(h)
+            f.readline()
+
+            siz = h * w * 3
+            img = np.array(struct.unpack('f' * siz, f.read(4 * siz)))
+            img = img.reshape((h, w, 3))
+
+        if img is None:
+            raise Exception('Failed to load file "{0}"'.format(path))
+
+        return img
