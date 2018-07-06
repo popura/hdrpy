@@ -1,11 +1,12 @@
-import numpy as np
 from scipy.stats import gmean
 import sys
 
+
 def multiply_scalar(intensity, factor=None, ev=0):
     eps = sys.float_info.epsilon
-    if factor == None:
-        factor = 0.18 * 2**ev
-               / gmean(intensity, axis=None, zero_sub=eps)
-    
+    replaced_intensity = intensity
+    replaced_intensity[intensity == 0] = eps
+    if factor is None:
+        factor = 0.18 * 2**ev / gmean(intensity, axis=None)
+
     return intensity * factor
