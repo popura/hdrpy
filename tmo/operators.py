@@ -11,16 +11,16 @@ def multiply_scalar(intensity, factor=None, ev=0):
     if factor is None:
         factor = 0.18 * 2**ev / gmean(intensity, axis=None)
 
-    print("NaN: {0}".format(np.isnan(intensity).any()))
-    print("INF: {0}".format(np.isinf(intensity).any()))
-    print("factor: {0}".format(factor))
+    #print("NaN: {0}".format(np.isnan(intensity).any()))
+    #print("INF: {0}".format(np.isinf(intensity).any()))
+    #print("factor: {0}".format(factor))
     return intensity * factor
 
 
 def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
     colourspace = RGB_COLOURSPACES["sRGB"]
+    np.clip(hdrimage, 0, np.finfo(np.float32).max, out=hdrimage)
     lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
-    np.clip(lum, 0, np.finfo(np.float32).max, out=lum)
     scaled_lum = multiply_scalar(lum, ev=ev)
     mapped_lum = reinhard_curve(scaled_lum, scaled_lum, lum_white)
     ldrimage = replace_color(hdrimage, mapped_lum, lum)
@@ -35,8 +35,8 @@ def reinhard_curve(lum, lum_ave, lum_white):
 
 def eilertsen_tmo(hdrimage, ev=0, exponent=0.9, sigma=0.6):
     colourspace = RGB_COLOURSPACES["sRGB"]
+    np.clip(hdrimage, 0, np.finfo(np.float32).max, out=hdrimage)
     lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
-    np.clip(lum, 0, np.finfo(np.float32).max, out=lum)
     scaled_lum = multiply_scalar(lum, ev=ev)
     scaled_image = replace_color(hdrimage, scaled_lum, lum)
     ldrimage = eilertsen_curve(scaled_image, exponent, sigma)
