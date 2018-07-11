@@ -17,8 +17,6 @@ def imread(path):
     except TypeError as e:
         print("at {0}".format(path.name))
         print(e)
-    print(path.name)
-    print(image.shape)
 
     return image
 
@@ -109,7 +107,7 @@ class ExrReader():
         image[:, :, 0] = charray.reshape(size[1], size[0])
         image[:, :, 1] = charray.reshape(size[1], size[0])
         image[:, :, 2] = charray.reshape(size[1], size[0])
-        
+
         return image
 
 
