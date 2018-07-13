@@ -16,7 +16,9 @@ def multiply_scalar(intensity, factor=None, ev=0):
     if np.isinf(gmean(intensity, axis=None)):
         print("INF: {0}".format(np.isinf(intensity).any()))
     #print("factor: {0}".format(factor))
-    return intensity * factor
+    new_intensity = intensity * factor
+    np.clip(new_intensity, 0, np.finfo(np.float32).max, out=new_intensity)
+    return new_intensity
 
 
 def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
@@ -31,6 +33,8 @@ def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
 
 
 def reinhard_curve(lum, lum_ave, lum_white):
+    np.clip(lum, 0, np.finfo(np.float32).max, out=lum)
+    np.clip(lum_ave, 0, np.finfo(np.float32).max, out=lum_ave)
     lum_disp = (lum / (1 + lum_ave)) * (1 + (lum / (lum_white ** 2)))
     return lum_disp
 
@@ -54,6 +58,7 @@ def eilertsen_curve(intensity, exponent, sigma):
 
 def replace_color(rgb, lum_new, lum_org):
     rgb_new = rgb
+    np.clip(lum_new, 0, np.finfo(np.float32).max, out=lum_new)
     ratio = lum_new / lum_org
     ratio[lum_org == 0] = 0
     rgb_new[:, :, 0] *= ratio
