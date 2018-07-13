@@ -11,8 +11,10 @@ def multiply_scalar(intensity, factor=None, ev=0):
     if factor is None:
         factor = 0.18 * 2**ev / gmean(intensity, axis=None)
 
-    #print("NaN: {0}".format(np.isnan(intensity).any()))
-    #print("INF: {0}".format(np.isinf(intensity).any()))
+    if np.isnan(gmean(intensity, axis=None)):
+        print("NaN: {0}".format(np.isnan(intensity).any()))
+    if np.isinf(gmean(intensity, axis=None)):
+        print("INF: {0}".format(np.isinf(intensity).any()))
     #print("factor: {0}".format(factor))
     return intensity * factor
 
