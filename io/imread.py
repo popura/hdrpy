@@ -8,7 +8,7 @@ import cv2
 from colour import RGB_COLOURSPACES
 
 
-def imread(path):
+def imread(path, nan_sub=None, inf_sub=None):
     path = Path(path)
     ext = path.suffix
     reader = ImReader.get(ext)
@@ -18,6 +18,10 @@ def imread(path):
         print("at {0}".format(path.name))
         print(e)
 
+    if nan_sub is not None:
+        image[np.isnan(image)] = nan_sub
+    if inf_sub is not None:
+        image[np.isinf(image)] = inf_sub
     return image
 
 
