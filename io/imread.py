@@ -249,6 +249,29 @@ class HdrReader():
 
         return img
 
+    def read_header(self, im_file):
+        while True:
+            buf = im_file.readline(bufsize).decode('ascii')
+            if buf[0] == '#' and (buf == '#?RADIANCE\n' or buf == '#?RGBE\n'):
+                valid = True
+            else:
+                p = re.compile('FORMAT=(.*)')
+                m = p.match(buf)
+                if m is not None and m.group(1) == '32-bit_rle_rgbe':
+                    filetype = self.HDR_RLE_RGBE_32
+                    continue
+                p = re.compile('EXPOSURE=(.*)')
+                m = p.match(buf)
+                if m is not None:
+                    exposure = float(m.group(1))
+                    continue
+            if buf[0] == '\n':
+                # Header section ends
+                break
+        if not valid:
+            raise Exception('HDR header is invalid!!')
+
+
 class PfmReader():
     def __init__(self, ):
         return
