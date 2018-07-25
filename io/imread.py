@@ -44,7 +44,7 @@ class ImReader():
         elif ext == ".pfm":
             reader = PfmReader()
         else:
-            raise TypeError(ext + "is not an HDR image")
+            raise TypeError(ext + " is not an HDR image")
 
         return reader
 
