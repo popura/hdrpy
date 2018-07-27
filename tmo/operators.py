@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from scipy.stats import gmean
 import sys
@@ -6,6 +7,7 @@ from colour import oetf, RGB_COLOURSPACES, RGB_luminance
 
 def multiply_scalar(intensity, factor=None, ev=0):
     eps = sys.float_info.epsilon
+    intensity = copy.deepcopy(intensity)
     intensity[np.isnan(intensity)] = eps
     intensity[intensity <= 0] = eps
     if factor is None:
@@ -23,7 +25,7 @@ def multiply_scalar(intensity, factor=None, ev=0):
 
 def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
     colourspace = RGB_COLOURSPACES["sRGB"]
-    np.clip(hdrimage, 0, np.finfo(np.float32).max, out=hdrimage)
+    hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
     lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
     scaled_lum = multiply_scalar(lum, ev=ev)
     mapped_lum = reinhard_curve(scaled_lum, scaled_lum, lum_white)
@@ -33,18 +35,18 @@ def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
 
 
 def reinhard_curve(lum, lum_ave, lum_white):
-    np.clip(lum, 0, np.finfo(np.float32).max, out=lum)
-    np.clip(lum_ave, 0, np.finfo(np.float32).max, out=lum_ave)
+    lum = np.clip(lum, 0, np.finfo(np.float32).max)
+    lum_ave = np.clip(lum_ave, 0, np.finfo(np.float32).max)
     lum_disp = (lum / (1 + lum_ave)) * (1 + (lum / (lum_white ** 2)))
     return lum_disp
 
 
 def eilertsen_tmo(hdrimage, ev=0, exponent=0.9, sigma=0.6):
     colourspace = RGB_COLOURSPACES["sRGB"]
-    np.clip(hdrimage, 0, np.finfo(np.float32).max, out=hdrimage)
-    lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
+    clipped_image = np.clip(hdrimage, 0, np.finfo(np.float32).max)
+    lum = RGB_luminance(clipped_image, colourspace.primaries, colourspace.whitepoint)
     scaled_lum = multiply_scalar(lum, ev=ev)
-    scaled_image = replace_color(hdrimage, scaled_lum, lum)
+    scaled_image = replace_color(clipped_image, scaled_lum, lum)
     ldrimage = eilertsen_curve(scaled_image, exponent, sigma)
     np.clip(ldrimage, 0, 1, out=ldrimage)
     return ldrimage
@@ -57,9 +59,9 @@ def eilertsen_curve(intensity, exponent, sigma):
 
 
 def replace_color(rgb, lum_new, lum_org):
-    rgb_new = rgb
-    np.clip(lum_new, 0, np.finfo(np.float32).max, out=lum_new)
-    ratio = lum_new / lum_org
+    rgb_new = copy.deepcopy(rgb)
+    clipped_lum = np.clip(lum_new, 0, np.finfo(np.float32).max)
+    ratio = clipped_lum / lum_org
     ratio[lum_org == 0] = 0
     rgb_new[:, :, 0] *= ratio
     rgb_new[:, :, 1] *= ratio
@@ -74,7 +76,9 @@ if __name__ == "__main__":
 
     hdrpath = Path("./") / "data" / "memorial_o876.hdr"
     hdrimage = imread.imread(str(hdrpath))
+    cp_hdrimage = copy.deepcopy(hdrimage)
     ldrimage = reinhard_tmo(hdrimage, ev=0)
+    print((hdrimage==cp_hdrimage).all())
     ldrimage = oetf(ldrimage, function="sRGB")
 
     import matplotlib.pyplot as plt
@@ -82,6 +86,7 @@ if __name__ == "__main__":
     plt.show()
 
     ldrimage = eilertsen_tmo(hdrimage, 0.9, 1)
+    print((hdrimage==cp_hdrimage).all())
     ldrimage = oetf(ldrimage, function="sRGB")
     plt.imshow(ldrimage)
     plt.show()
