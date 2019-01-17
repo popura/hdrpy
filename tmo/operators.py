@@ -30,7 +30,7 @@ def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
     scaled_lum = multiply_scalar(lum, ev=ev)
     mapped_lum = reinhard_curve(scaled_lum, scaled_lum, lum_white)
     ldrimage = replace_color(hdrimage, mapped_lum, lum)
-    np.clip(ldrimage, 0, 1, out=ldrimage)
+    #np.clip(ldrimage, 0, 1, out=ldrimage)
     return ldrimage
 
 
@@ -48,7 +48,7 @@ def eilertsen_tmo(hdrimage, ev=0, exponent=0.9, sigma=0.6):
     scaled_lum = multiply_scalar(lum, ev=ev)
     scaled_image = replace_color(clipped_image, scaled_lum, lum)
     ldrimage = eilertsen_curve(scaled_image, exponent, sigma)
-    np.clip(ldrimage, 0, 1, out=ldrimage)
+    #np.clip(ldrimage, 0, 1, out=ldrimage)
     return ldrimage
 
 
