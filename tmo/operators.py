@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import gmean
 import sys
 from colour import oetf, RGB_COLOURSPACES, RGB_luminance
+import cv2
 
 
 def multiply_scalar(intensity, factor=None, ev=0):
@@ -91,5 +92,13 @@ if __name__ == "__main__":
     plt.imshow(ldrimage)
     plt.show()
 
-    image_list = [reinhard_tmo(hdr_image, ev=j) for j in range(-1, 2)]
-    print(image_list.shape)
+    image_list = [reinhard_tmo(hdrimage, ev=0.25*j, lum_white=1)
+                  for j in range(-1, 2)]
+    print(len(image_list))
+    for j in range(len(image_list)):
+        print(image_list[j].shape)
+        image_list[j] = np.clip((image_list[j][:, :, ::-1] ** (1/2.2))*255, 0, 255)
+    merge_mertens = cv2.createMergeMertens(1., 1., 1.)
+    ldrimage = merge_mertens.process(image_list)
+    plt.imshow(np.clip(ldrimage[:, :, ::-1], 0, 1))
+    plt.show()
