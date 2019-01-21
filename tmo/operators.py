@@ -90,3 +90,6 @@ if __name__ == "__main__":
     ldrimage = oetf(ldrimage, function="sRGB")
     plt.imshow(ldrimage)
     plt.show()
+
+    image_list = [reinhard_tmo(hdr_image, ev=j) for j in range(-1, 2)]
+    print(image_list.shape)
