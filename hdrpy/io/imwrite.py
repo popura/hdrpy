@@ -1,7 +1,7 @@
 import re
 import struct
 #import OpenEXR
-import Imath
+#import Imath
 import numpy as np
 from pathlib import Path
 import cv2
