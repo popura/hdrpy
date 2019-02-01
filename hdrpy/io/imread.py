@@ -1,6 +1,6 @@
 import re
 import struct
-import OpenEXR
+#import OpenEXR
 import Imath
 import numpy as np
 from pathlib import Path
