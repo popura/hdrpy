@@ -4,7 +4,6 @@ setup(
     name='hdrpy',
     version='0.0.2',
     description='A package for handling high dynamic range images',
-    long_description=readme,
     author='Yuma Kinoshita',
     url='https://github.com/popura/hdrpy',
     license=license,
