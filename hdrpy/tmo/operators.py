@@ -24,6 +24,15 @@ def multiply_scalar(intensity, factor=None, ev=0):
     return new_intensity
 
 
+def normalize_luminance(hdrimage):
+    colourspace = RGB_COLOURSPACES["sRGB"]
+    hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
+    lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
+    max_lum = lum.max()
+    ldrimage = replace_color(hdrimage, lum / max_lum, lum)
+    return ldrimage
+
+
 def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
     colourspace = RGB_COLOURSPACES["sRGB"]
     hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
@@ -71,8 +80,7 @@ def replace_color(rgb, lum_new, lum_org):
 
 
 if __name__ == "__main__":
-    sys.path.append("./io/")
-    import imread
+    import hdrpy.io.imread as imread
     from pathlib import Path
 
     hdrpath = Path("./") / "data" / "memorial_o876.hdr"
@@ -91,6 +99,16 @@ if __name__ == "__main__":
     ldrimage = oetf(ldrimage, function="sRGB")
     plt.imshow(ldrimage)
     plt.show()
+
+    ldrimage = normalize_luminance(hdrimage)
+    ldrimage = oetf(ldrimage, function="sRGB")
+    plt.imshow(ldrimage)
+    plt.show()
+    colourspace = RGB_COLOURSPACES["sRGB"]
+    lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
+    print(lum.max())
+    print(lum.min())
+
 
     image_list = [reinhard_tmo(hdrimage, ev=0.25*j, lum_white=1)
                   for j in range(-1, 2)]

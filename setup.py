@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hdrpy',
-    version='0.0.2',
+    version='0.1.0',
     description='A package for handling high dynamic range images',
     author='Yuma Kinoshita',
     url='https://github.com/popura/hdrpy',
