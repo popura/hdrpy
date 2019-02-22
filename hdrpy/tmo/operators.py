@@ -33,6 +33,14 @@ def normalize_luminance(hdrimage):
     return ldrimage
 
 
+def normalize_color(hdrimage):
+    hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
+    max_intensity = hdrimage.max()
+    min_intensity = hdrimage.min()
+    ldrimage = (hdrimage - min_intensity) / (max_intensity - min_intensity)
+    return ldrimage
+
+
 def reinhard_tmo(hdrimage, ev=0, lum_white=float("inf")):
     colourspace = RGB_COLOURSPACES["sRGB"]
     hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
