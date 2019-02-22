@@ -34,7 +34,9 @@ def normalize_luminance(hdrimage):
 
 
 def normalize_color(hdrimage):
+    eps = sys.float_info.epsilon
     hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
+    hdrimage[np.isnan(hdrimage)] = eps
     max_intensity = hdrimage.max()
     min_intensity = hdrimage.min()
     ldrimage = (hdrimage - min_intensity) / (max_intensity - min_intensity)
