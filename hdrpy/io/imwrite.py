@@ -9,42 +9,61 @@ from colour import RGB_COLOURSPACES
 from hdrpy.io.pfm_format import PfmWriter
 
 
-def imwrite(path, img, nan_sub=None, inf_sub=None):
-    path = Path(path)
-    ext = path.suffix
-    writer = ImWriter.get(ext)
-
+def write(
+    path: Uniton[Path, str],
+    image: np.ndarray,
+    nan_sub: Optional[float] = None,
+    inf_sub: Optional[float] = None) -> None:
+    """Writes an HDR image file.
+    Args:
+        path: path to a file
+        image: ndarray with a size of (H, W, C)
+        nan_sub: value used for substituting NaN
+        inf_sub: value used for substituting Inf
+    Returns:
+        None
+    >>> image = write("../data/test_img.pfm", np.random.rand(100, 100, 3))
+    """
+    if isinstance(path, str):
+        path = Path(path)
+    
     if nan_sub is not None:
-        img[np.isnan(img)] = nan_sub
+        image[np.isnan(image)] = nan_sub
     if inf_sub is not None:
-        img[np.isinf(img)] = inf_sub
+        image[np.isinf(image)] = inf_sub
 
-    try:
-        writer.imwrite(str(path), img)
-    except TypeError as e:
-        print("at {0}".format(path.name))
-        print(e)
+    writer = WriterFactory.create(path)
+    image = writer(path, image)
+
+    return image
 
 
-class ImWriter():
+class WriterFactory(object):
     @staticmethod
-    def get(ext):
-        try:
-            writer = ImWriter.generate_writer(ext)
-        except TypeError as e:
-            print(e)
-
-        return writer
-
-    @staticmethod
-    def generate_writer(ext):
+    def create(path: Union[Path, str]):
+        """Returns a function for writing an image file to `path`.
+        Args:
+            Path:
+        Returns:
+            writer: 
+        >>> WriterFactory.create()
+        """
+        if isinstance(path, str):
+            path = Path(path)
+        
+        ext = path.suffix.lower()
         if ext == ".hdr":
-            raise TypeError("ImWriter cannot handle " + ext + " files")
+            raise NotImplementedError()
         elif ext == ".exr":
-            raise TypeError("ImWriter cannot handle " + ext + " files")
+            raise NotImplementedError()
         elif ext == ".pfm":
-            writer = PfmWriter()
+            writer = PFMFormat.write
         else:
-            raise TypeError(ext + " is not an HDR image")
-
+            raise NotImplementedError()
         return writer
+
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

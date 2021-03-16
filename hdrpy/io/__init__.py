@@ -1,3 +1,2 @@
-from hdrpy.io import pfm_format
-from hdrpy.io import imread
-from hdrpy.io import imwrite
+from hdrpy.io.imread import read
+from hdrpy.io.imwrite import write
