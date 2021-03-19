@@ -10,7 +10,6 @@ except ImportError:
     pass
 
 
-
 def write(
     path: Union[Path, str],
     image: np.ndarray,

@@ -53,7 +53,7 @@ class NejatiFusion:
     # decompose an image into a base layer and a detail layer
     def decompose(self, image):
         lum = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        base = guided_filter(lum, lum, self.r, self.eps))
+        base = guided_filter(lum, lum, self.r, self.eps)
         detail = np.zeros(self.img_list[0].shape)
         for i in range(3):
             detail[:, :, i] = img[:, :, i] - baselayer
@@ -89,7 +89,7 @@ class NejatiFusion:
     def fuse_detail(self, detail_layers, weights):
         normalized_weights = self.normalize_weights(weights)
         fused_detail = np.zeros(detail_layers[0].shape)
-        for detail, weight in zip(detail_layers, normalized_weights)
+        for detail, weight in zip(detail_layers, normalized_weights):
             fused_detail += weight * detail
         return fused_detail
 
