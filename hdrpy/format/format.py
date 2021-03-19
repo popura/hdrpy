@@ -4,6 +4,9 @@ from typing import Union
 import numpy as np
 
 class Format(object):
+    """Base class for handling an HDR image format,
+    e.g., reading and writing
+    """
     def __init__(self):
         pass
 

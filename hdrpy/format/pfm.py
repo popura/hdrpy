@@ -4,9 +4,12 @@ from typing import Union
 
 import numpy as np
 
-from hdrpy.format.format import Format
+from hdrpy.format import Format
 
 class PFMFormat(Format):
+    """Handles HDR images written in the portable floatmap image (PFM) format,
+    e.g., reading and writing
+    """
     @staticmethod
     def read(path: Union[Path, str]) -> np.ndarray:
         """Reads an HDR image with PFM format.
@@ -17,9 +20,6 @@ class PFMFormat(Format):
         >>> image = PFMFormat.read("./data/Flowers.pfm")
         >>> image.shape
         (853, 1280, 3)
-        >>> image = PFMFormat.read("./data/test_img.pfm")
-        >>> image.shape
-        (100, 100, 3)
         """
         image = None
         with open(path, 'rb') as f:
@@ -46,9 +46,10 @@ class PFMFormat(Format):
         Args:
             path: path to a file
             image: ndarray with a size of (H, W, C)
-        Returns:
-            None
         >>> PFMFormat.write("./data/test_img.pfm", np.random.rand(100, 100, 3))
+        >>> image = PFMFormat.read("./data/test_img.pfm")
+        >>> image.shape
+        (100, 100, 3)
         """
         h, w, dim = image.shape
         with open(path, 'wb') as f:

@@ -1,19 +1,21 @@
+import re
+from pathlib import Path
+from typing import Union
 
-class RadianceHDRFormat(object):
-    pass
+import numpy as np
+
+from hdrpy.format import Format
 
 
-class RadianceHDRReader():
-    def __init__(self, ):
-        self.HDR_NONE = 0x00
-        self.HDR_RLE_RGBE_32 = 0x01
-        return
+class _RadianceHDRReader(object):
+    HDR_NONE = 0x00
+    HDR_RLE_RGBE_32 = 0x01
 
     @classmethod
-    def imread(self, path):
+    def imread(cls, path):
         with open(path, "rb") as im_file:
             bufsize = 4096
-            filetype = self.HDR_NONE
+            filetype = cls.HDR_NONE
             valid = False
             exposure = 1.0
 
@@ -26,7 +28,7 @@ class RadianceHDRReader():
                     p = re.compile('FORMAT=(.*)')
                     m = p.match(buf)
                     if m is not None and m.group(1) == '32-bit_rle_rgbe':
-                        filetype = self.HDR_RLE_RGBE_32
+                        filetype = cls.HDR_RLE_RGBE_32
                         continue
 
                     p = re.compile('EXPOSURE=(.*)')
@@ -62,7 +64,7 @@ class RadianceHDRReader():
                 filetype = HDR_NONE
             im_file.seek(byte_start)
 
-            if filetype == self.HDR_RLE_RGBE_32:
+            if filetype == cls.HDR_RLE_RGBE_32:
                 # Run length encoded HDR
                 tmpdata = np.zeros((width * height * 4), dtype=np.uint8)
                 nowy = 0
@@ -121,7 +123,8 @@ class RadianceHDRReader():
 
         return img
 
-    def read_header(self, im_file):
+    @classmethod
+    def read_header(cls, im_file):
         while True:
             buf = im_file.readline(bufsize).decode('ascii')
             if buf[0] == '#' and (buf == '#?RADIANCE\n' or buf == '#?RGBE\n'):
@@ -130,7 +133,7 @@ class RadianceHDRReader():
                 p = re.compile('FORMAT=(.*)')
                 m = p.match(buf)
                 if m is not None and m.group(1) == '32-bit_rle_rgbe':
-                    filetype = self.HDR_RLE_RGBE_32
+                    filetype = cls.HDR_RLE_RGBE_32
                     continue
                 p = re.compile('EXPOSURE=(.*)')
                 m = p.match(buf)
@@ -144,7 +147,9 @@ class RadianceHDRReader():
             raise Exception('HDR header is invalid!!')
 
 
-    def save(filename, img):
+class _RadianceHDRWriter(object):
+    @classmethod
+    def save(cls, filename, img):
         """
         Save .hdr format
         """
@@ -188,6 +193,44 @@ class RadianceHDRReader():
                         cursor += cursor_move
 
             f.write(struct.pack('B' * len(buf), *buf))
+
+
+_reader = _RadianceHDRReader()
+# _writer = _RadianceHDRWriter()
+
+
+class RadianceHDRFormat(Format):
+    """Handles HDR images written in the Radiance HDR format,
+    e.g., reading and writing
+    """
+
+    @staticmethod
+    def read(path: Union[Path, str]) -> np.ndarray:
+        """Reads an HDR image with Radiance HDR format.
+        Args:
+            path: path to a file
+        Return:
+            image: readed image with a size of (H, W, C)
+        >>> image = RadianceHDRFormat.read("./data/memorial_o876.hdr")
+        >>> image.shape
+        (768, 512, 3)
+        """
+        return _reader.imread(path)
+    
+    @staticmethod
+    def write(
+        path: Union[Path, str],
+        image: np.ndarray) -> None:
+        """Writes an image to path as Radiance HDR format.
+        Args:
+            path: path to a file
+            image: ndarray with a size of (H, W, C)
+        >>> RadianceHDRFormat.write("./data/test_img.hdr", np.random.rand(100, 100, 3))
+        >>> image = RadianceHDRFormat.read("./data/test_img.hdr")
+        >>> image.shape
+        (100, 100, 3)
+        """
+        raise NotImplementedError()
 
 
 if __name__ == "__main__":

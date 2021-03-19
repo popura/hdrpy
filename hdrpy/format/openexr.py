@@ -1,6 +1,14 @@
-class OpenEXRFormat():
+from pathlib import Path
+from typing import Union
 
-class ExrReader():
+import numpy as np
+import OpenEXR
+import Imath
+
+from hdrpy.format import Format
+
+
+class _OpenEXRReader():
     def __init__(self, ):
         self.pt = Imath.PixelType(Imath.PixelType.FLOAT)
         return
@@ -81,6 +89,43 @@ class ExrReader():
         rgb[:, :, 1] /= y_weight[1]
 
         return rgb
+
+
+_reader = _OpenEXRReader()
+
+
+class OpenEXRFormat(Format):
+    """Handles HDR images written in the OpenEXR format,
+    e.g., reading and writing
+    """
+
+    @staticmethod
+    def read(path: Union[Path, str]) -> np.ndarray:
+        """Reads an HDR image with OpenEXR format.
+        Args:
+            path: path to a file
+        Return:
+            image: readed image with a size of (H, W, C)
+        >>> image = OpenEXRFormat.read("./data/CandleGlass.exr")
+        >>> image.shape
+        (853, 1280, 3)
+        """
+        return _reader.imread(path)
+    
+    @staticmethod
+    def write(
+        path: Union[Path, str],
+        image: np.ndarray) -> None:
+        """Writes an image to path as OpenEXR format.
+        Args:
+            path: path to a file
+            image: ndarray with a size of (H, W, C)
+        >>> OpenEXRFormat.write("./data/test_img.exr", np.random.rand(100, 100, 3))
+        >>> image = OpenEXRFormat.read("./data/test_img.exr")
+        >>> image.shape
+        (100, 100, 3)
+        """
+        raise NotImplementedError()
 
 
 if __name__ == "__main__":
