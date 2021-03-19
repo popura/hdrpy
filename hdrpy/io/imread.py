@@ -3,7 +3,11 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy.format import RadianceHDRReader, PFMFormat
+from hdrpy.format import RadianceHDRFormat, PFMFormat
+try:
+    from hdrpy.format import OpenEXRFormat
+except ImportError:
+    pass
 
 
 HDR_IMG_EXTENSIONS = ('.hdr', '.exr', '.pfm')
@@ -36,8 +40,12 @@ def read(path: Union[Path, str],
         inf_sub: value used for substituting Inf
     Returns:
         image: readed image with a size of (H, W, C)
-    >>> image = read("../data/memorial_o876.hdr")
+    >>> image = read("./data/memorial_o876.hdr")
     >>> image.shape
+    (768, 512, 3)
+    >>> image = read("./data/Flowers.pfm")
+    >>> image.shape
+    (853, 1280, 3)
     """
     if isinstance(path, str):
         path = Path(path)
@@ -54,19 +62,26 @@ def read(path: Union[Path, str],
 
 
 class ReaderFactory(object):
+    """Builds a HDR image reader for given image name.
+    """
     @staticmethod
     def create(path: Union[Path, str]):
         """Returns a function for reading an image file at `path`.
         Args:
-        Returns:
-        >>> ReaderFactory.create()
+            path: path to a file to be read
+        Return:
+            reader: python function for reading image at `path`
+        Raises:
+            NotImplementedError
+        >>> type(ReaderFactory.create("test.hdr"))
+        <class 'function'>
         """
         if isinstance(path, str):
             path = Path(path)
         
         ext = path.suffix.lower()
         if ext == ".hdr":
-            reader = RadianceHDRReader.read
+            reader = RadianceHDRFormat.read
         elif ext == ".exr":
             raise NotImplementedError()
         elif ext == ".pfm":

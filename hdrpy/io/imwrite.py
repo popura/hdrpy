@@ -1,16 +1,18 @@
-import re
-import struct
-import OpenEXR
-import Imath
-import numpy as np
 from pathlib import Path
-import cv2
-from colour import RGB_COLOURSPACES
-from hdrpy.io.pfm_format import PfmWriter
+from typing import Union, Optional
+
+import numpy as np
+
+from hdrpy.format import RadianceHDRFormat, PFMFormat
+try:
+    from hdrpy.format import OpenEXRFormat
+except ImportError:
+    pass
+
 
 
 def write(
-    path: Uniton[Path, str],
+    path: Union[Path, str],
     image: np.ndarray,
     nan_sub: Optional[float] = None,
     inf_sub: Optional[float] = None) -> None:
@@ -22,7 +24,7 @@ def write(
         inf_sub: value used for substituting Inf
     Returns:
         None
-    >>> image = write("../data/test_img.pfm", np.random.rand(100, 100, 3))
+    >>> image = write("./data/test_img.pfm", np.random.rand(100, 100, 3))
     """
     if isinstance(path, str):
         path = Path(path)
@@ -43,10 +45,13 @@ class WriterFactory(object):
     def create(path: Union[Path, str]):
         """Returns a function for writing an image file to `path`.
         Args:
-            Path:
+            path: path to a file to be wrote
         Returns:
-            writer: 
-        >>> WriterFactory.create()
+            writer: python function for writing image at `path`
+        Raises:
+            NotImplementedError
+        >>> type(WriterFactory.create("test.pfm"))
+        <class 'function'>
         """
         if isinstance(path, str):
             path = Path(path)
