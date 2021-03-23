@@ -1,2 +1,3 @@
-from hdrpy.tmo import operator
-from hdrpy.tmo import preprocessing
+from hdrpy.tmo.operator import *
+from hdrpy.image import get_luminance
+from hdrpy.math import gmean
