@@ -54,27 +54,37 @@ class EilertsenCurve(ColorProcessing):
         return eilertsen_curve(image, exponent, sigma)
 
 
-def eilertsen_tmo(
-    hdrimage: np.ndarray,
-    ev: float = 0,
-    exponent: float = 0.9,
-    sigma: float = 0.6):
-    """Applying Eilertsen's TMO to an image.
-    This function does not clip pixel values greater than 1.0
-    but pixel values less than 0.0 will be clipped
-    Args:
-        image: ndarray with a size of (H, W, C)
-    Returns:
-        tone-mapped image
-    >>> eilertsen_tmo(10 * np.random.rand(100, 100, 3))
+def EilertsenTMO(ColorProcessing):
+    """Eilertsen's TMO.
+    Attributes:
+        tmo: an instance of Compose that performs
+        the exposure compensation, and non-linear mapping.
+    Examples:
+    >>> hdr = 10 * np.random.rand(100, 100, 3)
+    >>> f = EilertsenTMO()
+    >>> ldr = f(hdr)
     """
-    colourspace = RGB_COLOURSPACES["sRGB"]
-    clipped_image = np.clip(hdrimage, 0, np.finfo(np.float32).max)
-    lum = RGB_luminance(clipped_image, colourspace.primaries, colourspace.whitepoint)
-    scaled_lum = multiply_scalar(lum, ev=ev)
-    scaled_image = replace_color(clipped_image, scaled_lum, lum)
-    ldrimage = eilertsen_curve(scaled_image, exponent, sigma)
-    return ldrimage
+    def __init__(
+        self,
+        ev: int = 0,
+        exponent: float = 0.9,
+        sigma: float = 0.6) -> None:
+        super().__init__()
+        self.tmo = Compose(
+            [ReplaceLuminance(ExposureCompensation(ev=ev)),
+             EilertsenCurve(exponent=exponent, sigma=sigma)])
+    
+    def __call__(self, image: np.ndarray) -> np.ndarray:
+        """Applying Eilertsen's TMO to an image.
+        This function does not clip pixel values greater than 1.0
+        but pixel values less than 0.0 will be clipped
+        Args:
+            image: ndarray with a size of (H, W, C)
+        Returns:
+            tone-mapped image
+        >>> eilertsen_tmo(10 * np.random.rand(100, 100, 3))
+        """
+        return self.tmo(image)
 
 
 if __name__ == "__main__":

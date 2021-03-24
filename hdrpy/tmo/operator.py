@@ -1,4 +1,5 @@
 from typing import Union
+from collections.abc import Sequence
 
 import copy
 import numpy as np
@@ -27,23 +28,24 @@ class ColorProcessing(object):
 
 
 class ReplaceLuminance(ColorProcessing):
-    """Replaces luminance of given image with given luminance.
+    """Replaces luminance of a given image with luminance obtained
+    by applying LuminanceProcessing to the image.
     Attributes:
-        luminance: New luminance that the resulting image will have
-        org_luminance: current luminance of image
+        processing: luminance processing to be applied to images
     Examples:
-    >>> f = ReplaceLuminance(luminance)
+    >>> processing = 
+    >>> f = ReplaceLuminance(processing)
     >>> new_image = f(image)
-    >>> np.allclose(get_luminance(new_image), lumiance)
+    >>> luminance = get_luminance(image)
+    >>> new_luminance = processing(luminance)
+    >>> np.allclose(get_luminance(new_image), new_lumiance)
     True
     """
     def __init__(
         self,
-        luminance: np.ndarray,
-        org_luminance: Union[np.ndarray, None] = None) -> None:
+        processing: LuminanceProcessing) -> None:
         super().__init__()
-        self.luminance = np.clip(luminance, 0, np.finfo(np.float32).max)
-        self.org_lumiannce = org_luminance
+        self.processing = processing
 
     def __call__(
         self,
@@ -54,7 +56,9 @@ class ReplaceLuminance(ColorProcessing):
         Returns:
             New RGB image
         """
-        return replace_luminance(image, self.luminance, self.org_luminance)
+        org_luminance = get_luminance(image)
+        luminance = self.processing(org_luminance)
+        return replace_luminance(image, luminance, org_luminance)
 
 
 def replace_luminance(
@@ -69,7 +73,7 @@ def replace_luminance(
     Returns:
         New RGB image
     """
-    luminance = np.clip(lum_new, 0, np.finfo(np.float32).max)
+    luminance = np.clip(luminance, 0, np.finfo(np.float32).max)
 
     if org_lumiannce is None:
         org_luminance = get_luminance(image)
@@ -94,6 +98,27 @@ class LuminanceProcessing(object):
             New luminannce
         """
         raise NotImplementedError()
+
+
+class Compose(ColorProcessing, LuminanceProcessing):
+    """Class for compiling a sequence of color or luminance processings
+    Attributes:
+        processings: a sequence of processings
+    Examples:
+    >>> processings = [ExposureCompensation(), NormalizeRange()]
+    >>> f = Compose(processings)
+    >>> f(np.random.rand(100, 100))
+    """
+    def __init__(
+        self,
+        processings: Union[Sequence[ColorProcessing], Sequence[LuminanceProcessing]]) -> None:
+        self.processings = processings
+
+    def __call__(self, image: np.ndarray) -> np.ndarray:
+        x = np.copy(image)
+        for f in processings:
+            x = f(x)
+        return x
 
 
 if __name__ == "__main__":

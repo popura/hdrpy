@@ -3,6 +3,7 @@ from typing import Union, Optional
 import numpy as np
 
 import hdrpy
+from hdrpy import get_luminance
 from hdrpy.tmo import ColorProcessing, LuminanceProcessing
 
 

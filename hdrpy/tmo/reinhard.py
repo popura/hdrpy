@@ -2,7 +2,9 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy.tmo import ColorProcessing, LuminanceProcessing
+from hdrpy import get_luminance
+from hdrpy.tmo import ColorProcessing, LuminanceProcessing, Compose, ReplaceLuminance
+from hdrpy.tmo.linear import ExposureCompensation
 
 
 def reinhard_curve(
@@ -36,7 +38,10 @@ class ReinhardCurve(LuminanceProcessing):
     >>> f = ReinhardCurve("global")
     >>> new_lumminance = f(lumminance)
     """
-    def __init__(self, mode: str = "global", whitepoint: Union[float, str] = "Inf") -> None:
+    def __init__(
+        self,
+        mode: str = "global",
+        whitepoint: Union[float, str] = "Inf") -> None:
         if mode not in ("global", "local"):
             raise ValueError()
 
@@ -64,29 +69,37 @@ class ReinhardCurve(LuminanceProcessing):
         return reinhard_curve(luminance, average_luminance, self.whitepoint)
 
 
-def reinhard_tmo(
-    hdrimage: np.ndarray,
-    ev: float = 0,
-    lum_white: Optional[float] = None) -> np.ndarray:
-    """Applying Reinhard's TMO to an image.
-    This function does not clip pixel values greater than 1.0
-    but pixel values less than 0.0 will be clipped
-    Args:
-        image: ndarray with a size of (H, W, C)
-    Returns:
-        tone-mapped image
-    >>> reinhard_tmo(10 * np.random.rand(100, 100, 3))
+def ReinhardTMO(ColorProcessing):
+    """Reinhard's TMO.
+    Attributes:
+        tmo: an instance of ReplaceLuminance that performs
+        the exposure compensation, non-linear mapping, and replacing luminance.
+    Examples:
+    >>> hdr = 10 * np.random.rand(100, 100, 3)
+    >>> f = ReinhardTMO()
+    >>> ldr = f(hdr)
     """
-    if lum_white is None:
-        lum_white = float("Inf")
-
-    colourspace = RGB_COLOURSPACES["sRGB"]
-    hdrimage = np.clip(hdrimage, 0, np.finfo(np.float32).max)
-    lum = RGB_luminance(hdrimage, colourspace.primaries, colourspace.whitepoint)
-    scaled_lum = multiply_scalar(lum, ev=ev)
-    mapped_lum = reinhard_curve(scaled_lum, scaled_lum, lum_white)
-    ldrimage = replace_color(hdrimage, mapped_lum, lum)
-    return ldrimage
+    def __init__(
+        self,
+        ev: int = 0,
+        mode: str = "global",
+        whitepoint: Union[float, str] = "Inf") -> None:
+        super().__init__()
+        self.tmo = ReplaceLuminance(
+            Compose([ExposureCompensation(ev=ev)
+                     ReinhardCurve(mode=mode, whitepoint=whitepoint)]))
+    
+    def __call__(self, image: np.ndarray) -> np.ndarray:
+        """Applying Reinhard's TMO to an image.
+        This function does not clip pixel values greater than 1.0
+        but pixel values less than 0.0 will be clipped
+        Args:
+            image: ndarray with a size of (H, W, C)
+        Returns:
+            tone-mapped image
+        >>> reinhard_tmo(10 * np.random.rand(100, 100, 3))
+        """
+        return self.tmo(image)
 
 
 if __name__ == "__main__":
