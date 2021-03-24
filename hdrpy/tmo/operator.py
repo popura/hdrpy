@@ -1,12 +1,8 @@
 from typing import Union
 from collections.abc import Sequence
 
-import copy
 import numpy as np
-from scipy.stats import gmean
-import sys
 from colour import oetf, RGB_COLOURSPACES, RGB_luminance
-import cv2
 
 from hdrpy import get_luminance
 
@@ -25,6 +21,24 @@ class ColorProcessing(object):
             New RGB image
         """
         raise NotImplementedError()
+
+
+class LuminanceProcessing(object):
+    """Base class for processing image luminance.
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, luminance: np.ndarray) -> np.ndarray:
+        """Processes luminance
+        Args:
+            luminance: luminancea with a size of (H, W)
+        Returns:
+            New luminannce
+        """
+        raise NotImplementedError()
+
+
 
 
 class ReplaceLuminance(ColorProcessing):
@@ -82,22 +96,6 @@ def replace_luminance(
     ratio[org_luminance == 0] = 0
 
     return image * ratio
-
-
-class LuminanceProcessing(object):
-    """Base class for processing image luminance.
-    """
-    def __init__(self):
-        pass
-
-    def __call__(self, luminance: np.ndarray) -> np.ndarray:
-        """Processes luminance
-        Args:
-            luminance: luminancea with a size of (H, W)
-        Returns:
-            New luminannce
-        """
-        raise NotImplementedError()
 
 
 class Compose(ColorProcessing, LuminanceProcessing):
