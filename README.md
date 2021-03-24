@@ -3,7 +3,12 @@ A package for handling high dynamic range (HDR) images with Python.
 This package is under development.
 
 # Installation
-Run the command:
+Install libopenexr-dev for adding a python binding of OpenEXR:
+```
+apt install libopenexr-dev
+```
+
+After that, run the command:
 ```
 pip install git+https://github.com/popura/hdrpy.git
 ```
