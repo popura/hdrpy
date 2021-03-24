@@ -2,7 +2,7 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy import get_luminance
+from hdrpy.image import get_luminance
 from hdrpy.tmo import ColorProcessing, LuminanceProcessing, Compose, ReplaceLuminance
 from hdrpy.tmo.linear import ExposureCompensation
 
@@ -69,7 +69,7 @@ class ReinhardCurve(LuminanceProcessing):
         return reinhard_curve(luminance, average_luminance, self.whitepoint)
 
 
-def ReinhardTMO(ColorProcessing):
+class ReinhardTMO(ColorProcessing):
     """Reinhard's TMO.
     Attributes:
         tmo: an instance of ReplaceLuminance that performs
@@ -81,12 +81,12 @@ def ReinhardTMO(ColorProcessing):
     """
     def __init__(
         self,
-        ev: int = 0,
+        ev: float = 0,
         mode: str = "global",
         whitepoint: Union[float, str] = "Inf") -> None:
         super().__init__()
         self.tmo = ReplaceLuminance(
-            Compose([ExposureCompensation(ev=ev)
+            Compose([ExposureCompensation(ev=ev),
                      ReinhardCurve(mode=mode, whitepoint=whitepoint)]))
     
     def __call__(self, image: np.ndarray) -> np.ndarray:

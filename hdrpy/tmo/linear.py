@@ -2,8 +2,8 @@ from typing import Union, Optional
 
 import numpy as np
 
-import hdrpy
-from hdrpy import get_luminance
+from hdrpy.math import gmean
+from hdrpy.image import get_luminance
 from hdrpy.tmo import ColorProcessing, LuminanceProcessing
 
 
@@ -86,9 +86,9 @@ class ExposureCompensation(ColorProcessing, LuminanceProcessing):
         Returns:
             New image or luminance with the same size of the input
         """
-        gmean = hdrpy.gmean(image, self.eps)
-        factor = self.ev2gmean(self.ev) / gmean
-        return multiply_scaler(intensity, factor)
+        g = gmean(image, eps=self.eps)
+        factor = self.ev2gmean(self.ev) / g
+        return multiply_scalar(image, factor)
         
     @staticmethod
     def ev2gmean(ev: float) -> float:
@@ -132,7 +132,7 @@ class ExposureCompensation(ColorProcessing, LuminanceProcessing):
         >>> ExposureCompensation.ev2gmean(0.09)
         -1.0
         """
-        return np.log2(gmean / 0.18)
+        return np.log2(g / 0.18)
     
 
 class NormalizeRange(ColorProcessing, LuminanceProcessing):

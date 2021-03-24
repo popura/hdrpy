@@ -2,7 +2,8 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy.tmo import ColorProcessing, LuminanceProcessing
+from hdrpy.tmo import ColorProcessing, LuminanceProcessing, Compose, ReplaceLuminance
+from hdrpy.tmo.linear import ExposureCompensation
 
 
 def eilertsen_curve(
@@ -51,10 +52,10 @@ class EilertsenCurve(ColorProcessing):
         Returns:
             tone-mapped image
         """
-        return eilertsen_curve(image, exponent, sigma)
+        return eilertsen_curve(image, self.exponent, self.sigma)
 
 
-def EilertsenTMO(ColorProcessing):
+class EilertsenTMO(ColorProcessing):
     """Eilertsen's TMO.
     Attributes:
         tmo: an instance of Compose that performs

@@ -215,7 +215,7 @@ class RadianceHDRFormat(Format):
         >>> image.shape
         (768, 512, 3)
         """
-        return _reader.imread(path)
+        return _reader.imread(str(path))
     
     @staticmethod
     def write(

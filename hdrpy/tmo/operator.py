@@ -4,7 +4,7 @@ from collections.abc import Sequence
 import numpy as np
 from colour import oetf, RGB_COLOURSPACES, RGB_luminance
 
-from hdrpy import get_luminance
+from hdrpy.image import get_luminance
 
 
 class ColorProcessing(object):
@@ -89,11 +89,14 @@ def replace_luminance(
     """
     luminance = np.clip(luminance, 0, np.finfo(np.float32).max)
 
-    if org_lumiannce is None:
+    if org_luminance is None:
         org_luminance = get_luminance(image)
 
-    ratio = self.luminance / org_luminance
+    ratio = luminance / org_luminance
     ratio[org_luminance == 0] = 0
+
+    if image.ndim == 3:
+        ratio = ratio[:, :, np.newaxis]
 
     return image * ratio
 
@@ -114,7 +117,7 @@ class Compose(ColorProcessing, LuminanceProcessing):
 
     def __call__(self, image: np.ndarray) -> np.ndarray:
         x = np.copy(image)
-        for f in processings:
+        for f in self.processings:
             x = f(x)
         return x
 

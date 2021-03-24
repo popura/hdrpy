@@ -5,6 +5,9 @@ import numpy as np
 import OpenEXR
 import Imath
 
+import cv2
+from colour import oetf, RGB_COLOURSPACES, RGB_luminance
+
 from hdrpy.format import Format
 
 
@@ -110,7 +113,7 @@ class OpenEXRFormat(Format):
         >>> image.shape
         (853, 1280, 3)
         """
-        return _reader.imread(path)
+        return _reader.imread(str(path))
     
     @staticmethod
     def write(

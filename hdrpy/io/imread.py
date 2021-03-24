@@ -3,11 +3,7 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy.format import RadianceHDRFormat, PFMFormat
-try:
-    from hdrpy.format import OpenEXRFormat
-except ImportError:
-    pass
+from hdrpy.format import RadianceHDRFormat, PFMFormat, OpenEXRFormat
 
 
 HDR_IMG_EXTENSIONS = ('.hdr', '.exr', '.pfm')
@@ -83,7 +79,7 @@ class ReaderFactory(object):
         if ext == ".hdr":
             reader = RadianceHDRFormat.read
         elif ext == ".exr":
-            raise NotImplementedError()
+            reader = OpenEXRFormat.read
         elif ext == ".pfm":
             reader = PFMFormat.read
         else:
