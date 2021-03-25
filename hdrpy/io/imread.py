@@ -3,6 +3,7 @@ from typing import Union, Optional
 
 import numpy as np
 
+from hdrpy.stats import min_max_normalization
 from hdrpy.format import RadianceHDRFormat, PFMFormat, OpenEXRFormat
 
 
@@ -83,7 +84,23 @@ class ReaderFactory(object):
         elif ext == ".pfm":
             reader = PFMFormat.read
         else:
-            raise NotImplementedError()
+            # assuming the image is LDR
+            def pil_reader(path: Union[Path, str]) -> np.ndarray:
+                # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
+                with open(path, 'rb') as f:
+                    img = Image.open(f)
+                img = np.asarray(img.convert("RGB"))
+                if img.dtype.startswith("uint") or img.dtype.startswith("int"):
+                    info = np.iinfo(img.dtype)
+                elif img.dtype.startswith("float"):
+                    info = np.finfo(img.dtype)
+                else:
+                    raise TypeError()
+
+                min_ = float(info.min)
+                max_ = float(info.max)
+                return min_max_normalization(img.astype(np.float64), min_, max_)    
+            reader = pil_reader
         return reader
 
 

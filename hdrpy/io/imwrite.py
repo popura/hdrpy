@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union, Optional
 
 import numpy as np
+from PIL import Image
 
 from hdrpy.format import RadianceHDRFormat, PFMFormat
 try:
@@ -24,6 +25,7 @@ def write(
     Returns:
         None
     >>> image = write("./data/test_img.pfm", np.random.rand(100, 100, 3))
+    >>> image = write("./data/test_img.jpg", np.random.rand(100, 100, 3))
     """
     if isinstance(path, str):
         path = Path(path)
@@ -63,7 +65,11 @@ class WriterFactory(object):
         elif ext == ".pfm":
             writer = PFMFormat.write
         else:
-            raise NotImplementedError()
+            def pil_writer(path: Union[Path, str], image: np.ndarray) -> None:
+                image = np.clip(image, 0, 1)
+                image *= np.iinfo("uint8").max
+                Image.fromarray(image.astype(np.uint8)).save(str(path))
+            writer = pil_writer
         return writer
 
 

@@ -2,7 +2,7 @@ from typing import Union, Optional
 
 import numpy as np
 
-from hdrpy.math import gmean
+from hdrpy.stats import gmean
 from hdrpy.image import get_luminance
 from hdrpy.tmo import ColorProcessing, LuminanceProcessing
 
@@ -166,7 +166,7 @@ class NormalizeRange(ColorProcessing, LuminanceProcessing):
         Returns:
             normalized image
         """
-        if self.mode is "luminance":
+        if self.mode == "luminance":
             lum = hdrpy.get_lumianance(image)
             factor = 1. / np.amax(lum)
         else:
