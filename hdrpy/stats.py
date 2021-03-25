@@ -25,12 +25,16 @@ def gmean(
     2.0
     >>> gmean(np.array([1, 2, 3, 4, 5, 6, 7]))
     3.3800151591412964
+    >>> import hdrpy
+    >>> hdr = hdrpy.io.read("./data/CandleGlass.exr")
+    >>> gmean(hdrpy.image.get_luminance(hdr))
+    0.00040137774000534386
     """
     a_c = a.copy()
     if eps is not None:
         a_c[a_c <= 0] = eps
         a_c[np.isnan(a_c)] = eps
-    log_a = np.log(a)
+    log_a = np.log(a_c)
     return np.exp(log_a.mean(axis=axis))
 
 

@@ -20,8 +20,9 @@ def reinhard_curve(
         lum_white: white point.
     Returns:
         tone-mapped intensity
-    >>> lum = np.linspace(0, 10, 1000)
+    >>> lum = np.linspace(0, 10, 5)
     >>> reinhard_curve(lum=lum, lum_ave=lum, lum_white=float("Inf"))
+    array([ 0.        ,  0.71428571,  0.83333333,  0.88235294,  0.90909091])
     """
     lum = np.clip(lum, 0, np.finfo(np.float32).max)
     lum_ave = np.clip(lum_ave, 0, np.finfo(np.float32).max)
@@ -35,8 +36,11 @@ class ReinhardCurve(LuminanceProcessing):
         mode: `global` or `local`
         whitepoint: whitepoint
     Examples:
+    >>> import hdrpy
+    >>> image = hdrpy.io.read("./data/CandleGlass.exr")
+    >>> luminance = hdrpy.image.get_luminance(image)
     >>> f = ReinhardCurve("global")
-    >>> new_lumminance = f(lumminance)
+    >>> new_lumminance = f(luminance)
     """
     def __init__(
         self,
@@ -75,9 +79,11 @@ class ReinhardTMO(ColorProcessing):
         tmo: an instance of ReplaceLuminance that performs
         the exposure compensation, non-linear mapping, and replacing luminance.
     Examples:
-    >>> hdr = 10 * np.random.rand(100, 100, 3)
+    >>> import hdrpy
+    >>> hdr = hdrpy.io.read("./data/CandleGlass.exr")
     >>> f = ReinhardTMO()
     >>> ldr = f(hdr)
+    >>> hdrpy.io.write("./data/CandleGlass.jpg", ldr)
     """
     def __init__(
         self,
@@ -97,7 +103,6 @@ class ReinhardTMO(ColorProcessing):
             image: ndarray with a size of (H, W, C)
         Returns:
             tone-mapped image
-        >>> reinhard_tmo(10 * np.random.rand(100, 100, 3))
         """
         return self.tmo(image)
 

@@ -39,8 +39,6 @@ class LuminanceProcessing(object):
         raise NotImplementedError()
 
 
-
-
 class ReplaceLuminance(ColorProcessing):
     """Replaces luminance of a given image with luminance obtained
     by applying LuminanceProcessing to the image.

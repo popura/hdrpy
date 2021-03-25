@@ -19,9 +19,11 @@ def eilertsen_curve(
         sigma:
     Returns:
         tone-mapped intensity
-    >>> intensity = np.linspace(0, 10, 1000)
+    >>> intensity = np.linspace(0, 10, 5)
     >>> eilertsen_curve(intensity=intensity, exponent=0.9, sigma=0.6)
+    array([ 0.        ,  1.26679496,  1.4023349 ,  1.45738344,  1.48763101])
     """
+    intensity = np.clip(intensity, 0, np.finfo(np.float32).max)
     powered_intensity = intensity ** exponent
     intensity_disp = (1 + sigma) * (powered_intensity / (powered_intensity + sigma))
     return intensity_disp
@@ -33,8 +35,11 @@ class EilertsenCurve(ColorProcessing):
         exponent:
         sigma:
     Examples:
+    >>> import hdrpy
+    >>> image = hdrpy.io.read("./data/CandleGlass.exr")
+    >>> luminance = hdrpy.image.get_luminance(image)
     >>> f = EilertsenCurve()
-    >>> new_image = f(image)
+    >>> new_lumminance = f(luminance)
     """
     def __init__(
         self,
@@ -61,9 +66,11 @@ class EilertsenTMO(ColorProcessing):
         tmo: an instance of Compose that performs
         the exposure compensation, and non-linear mapping.
     Examples:
-    >>> hdr = 10 * np.random.rand(100, 100, 3)
+    >>> import hdrpy
+    >>> hdr = hdrpy.io.read("./data/CandleGlass.exr")
     >>> f = EilertsenTMO()
     >>> ldr = f(hdr)
+    >>> hdrpy.io.write("./data/CandleGlass.jpg", ldr)
     """
     def __init__(
         self,
@@ -83,7 +90,6 @@ class EilertsenTMO(ColorProcessing):
             image: ndarray with a size of (H, W, C)
         Returns:
             tone-mapped image
-        >>> eilertsen_tmo(10 * np.random.rand(100, 100, 3))
         """
         return self.tmo(image)
 

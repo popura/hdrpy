@@ -15,23 +15,31 @@ def multiply_scalar(
     minus_sub: Optional[float] = 0) -> np.ndarray:
     """Compensates exposure of given image.
     Args:
-        image: ndarray with a size of (H, W, C)
+        intensity: input array
+        factor: scale ratio
+        nan_sub: value for substituting NaN in `intensity`
+        inf_sub: value for substituting Inf in `intensity`
+        minus_sub: value for substituting negative values in `intensity`
     Returns:
         multiplied image
     Raise:
         ValueError
-    >>> image = multiply_scalar(np.ones((5, 5)))
-    >>> np.isclose(gmean(image, axis=None), 0.18)
-    True
-    >>> image = multiply_scalar(np.ones((5, 5, 2)), ev=1)
-    >>> np.isclose(gmean(image, axis=None), 0.36)
-    True
-    >>> image = multiply_scalar(np.ones(5), ev=-2)
-    >>> np.isclose(gmean(image, axis=None), 0.045)
-    True
-    >>> image1 = np.ones((10, 10))
-    >>> image2 = multiply_scalar(image1, factor=1.5)
-    >>> np.allclose(image1 * 1.5, image2)
+    >>> image = np.ones((5, 5))
+    >>> multiply_scalar(image, factor=2)
+    array([[ 2.,  2.,  2.,  2.,  2.],
+           [ 2.,  2.,  2.,  2.,  2.],
+           [ 2.,  2.,  2.,  2.,  2.],
+           [ 2.,  2.,  2.,  2.,  2.],
+           [ 2.,  2.,  2.,  2.,  2.]])
+    >>> multiply_scalar(image, factor=0.5)
+    array([[ 0.5,  0.5,  0.5,  0.5,  0.5],
+           [ 0.5,  0.5,  0.5,  0.5,  0.5],
+           [ 0.5,  0.5,  0.5,  0.5,  0.5],
+           [ 0.5,  0.5,  0.5,  0.5,  0.5],
+           [ 0.5,  0.5,  0.5,  0.5,  0.5]])
+    >>> image = np.random.randn(5, 5)
+    >>> image = multiply_scalar(image, factor=2, minus_sub=0)
+    >>> np.all(image >= 0)
     True
     """
 
@@ -61,14 +69,20 @@ class ExposureCompensation(ColorProcessing, LuminanceProcessing):
         ev: target exposure value
         eps: small value for stability
     Examples:
+    >>> import hdrpy
+    >>> hdr = hdrpy.io.read("./data/CandleGlass.exr")
+    >>> luminance = hdrpy.image.get_luminance(hdr)
     >>> f = ExposureCompensation()
     >>> new_luminance = f(luminance)
-    >>> np.isclose(gmean(new_luminannce, axis=None), 0.18)
+    >>> np.isclose(gmean(new_luminance, axis=None), 0.18, atol=1e-3)
     True
     >>> f = ExposureCompensation(ev=1)
     >>> new_luminance = f(luminance)
-    >>> np.isclose(gmean(new_luminannce, axis=None), 0.36)
+    >>> np.isclose(gmean(new_luminance, axis=None), 0.36, atol=1e-3)
     True
+    >>> f = ExposureCompensation(ev=0)
+    >>> ldr = f(hdr)
+    >>> hdrpy.io.write("./data/CandleGlass.jpg", ldr)
     """
     def __init__(
         self,
@@ -110,10 +124,10 @@ class ExposureCompensation(ColorProcessing, LuminanceProcessing):
         >>> ExposureCompensation.ev2gmean(-1)
         0.09
         """
-        return 0.18 * 2**ev
+        return 0.18 * (2**ev)
     
     @staticmethod
-    def gmean2ev(gmean: float) -> float:
+    def gmean2ev(g: float) -> float:
         """Calculates an relative exposure value of an image
         whose geometric mean of luminance is `gmean`,
         where 0 EV means that the geometric mean is 0.18
@@ -127,9 +141,9 @@ class ExposureCompensation(ColorProcessing, LuminanceProcessing):
         Examples:
         >>> ExposureCompensation.gmean2ev(0.18)
         0.0
-        >>> ExposureCompensation.ev2gmean(0.72)
+        >>> ExposureCompensation.gmean2ev(0.72)
         2.0
-        >>> ExposureCompensation.ev2gmean(0.09)
+        >>> ExposureCompensation.gmean2ev(0.09)
         -1.0
         """
         return np.log2(g / 0.18)
@@ -145,10 +159,8 @@ class NormalizeRange(ColorProcessing, LuminanceProcessing):
     Examples:
     >>> f = NormalizeRange("color")
     >>> image = f(np.random.randn(100, 100, 3))
-    >>> np.amax(image)
-    1.
-    >>> np.amin(image)
-    0.
+    >>> np.all(image <= 1)
+    True
     """
     def __init__(self, mode: str = "luminance"):
         super().__init__()
@@ -172,7 +184,7 @@ class NormalizeRange(ColorProcessing, LuminanceProcessing):
         else:
             factor = 1. / np.amax(image)
         
-        return multiply_scaler(image, factor)
+        return multiply_scalar(image, factor)
 
 
 if __name__ == "__main__":

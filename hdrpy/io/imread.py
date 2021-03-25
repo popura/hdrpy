@@ -43,6 +43,11 @@ def read(path: Union[Path, str],
     >>> image = read("./data/Flowers.pfm")
     >>> image.shape
     (853, 1280, 3)
+    >>> image = read("./data/CandleGlass.exr")
+    >>> np.any(np.isnan(image))
+    False
+    >>> np.any(np.isinf(image))
+    False
     """
     if isinstance(path, str):
         path = Path(path)
