@@ -82,7 +82,7 @@ class _OpenEXRReader():
 
     def ycbcr_to_rgb(self, ycbcr):
         colourspace = RGB_COLOURSPACES["ITU-R BT.709"]
-        y_weight = colourspace.RGB_to_XYZ_matrix[1, :]
+        y_weight = colourspace.matrix_RGB_to_XYZ[1, :]
         rgb = np.zeros(ycbcr.shape, dtype=float)
         rgb[:, :, 0] = ycbcr[:, :, 2] * ycbcr[:, :, 0] + ycbcr[:, :, 0]
         rgb[:, :, 2] = ycbcr[:, :, 1] * ycbcr[:, :, 0] + ycbcr[:, :, 0]

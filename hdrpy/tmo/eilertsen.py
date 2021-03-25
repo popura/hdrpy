@@ -30,7 +30,7 @@ def eilertsen_curve(
 
 
 class EilertsenCurve(ColorProcessing):
-    """Non-linear tone curve for Reinhard's TMO.
+    """Non-linear tone curve for Eilertsen's TMO.
     Attributes:
         exponent:
         sigma:

@@ -90,8 +90,10 @@ def replace_luminance(
     if org_luminance is None:
         org_luminance = get_luminance(image)
 
-    ratio = luminance / org_luminance
-    ratio[org_luminance == 0] = 0
+    is_zero = (org_luminance == 0)
+    ratio = luminance
+    ratio[~is_zero] /= org_luminance[~is_zero]
+    ratio[is_zero] = 0
 
     if image.ndim == 3:
         ratio = ratio[:, :, np.newaxis]
