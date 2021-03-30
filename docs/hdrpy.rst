@@ -13,6 +13,25 @@ Subpackages
    hdrpy.mef
    hdrpy.tmo
 
+Submodules
+----------
+
+hdrpy.image module
+------------------
+
+.. automodule:: hdrpy.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hdrpy.stats module
+------------------
+
+.. automodule:: hdrpy.stats
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
