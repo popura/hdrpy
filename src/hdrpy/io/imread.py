@@ -5,10 +5,10 @@ import numpy as np
 from PIL import Image
 
 from hdrpy.stats import min_max_normalization
-from hdrpy.format import RadianceHDRFormat, PFMFormat, OpenEXRFormat
+from hdrpy.format import RadianceHDRFormat, PFMFormat
 
 
-HDR_IMG_EXTENSIONS = ('.hdr', '.exr', '.pfm')
+HDR_IMG_EXTENSIONS = ('.hdr', '.pfm')
 
 
 def has_file_allowed_extension(
@@ -44,11 +44,6 @@ def read(path: Union[Path, str],
     >>> image = read("./data/Flowers.pfm")
     >>> image.shape
     (853, 1280, 3)
-    >>> image = read("./data/CandleGlass.exr")
-    >>> np.any(np.isnan(image))
-    False
-    >>> np.any(np.isinf(image))
-    False
     """
     if isinstance(path, str):
         path = Path(path)
@@ -85,8 +80,6 @@ class ReaderFactory(object):
         ext = path.suffix.lower()
         if ext == ".hdr":
             reader = RadianceHDRFormat.read
-        elif ext == ".exr":
-            reader = OpenEXRFormat.read
         elif ext == ".pfm":
             reader = PFMFormat.read
         else:
