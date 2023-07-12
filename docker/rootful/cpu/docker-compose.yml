@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  hdrpy:
+    build:
+      context: ../../../
+      dockerfile: ./docker/rootful/Dockerfile
+      args:
+        - BASE_IMAGE=ubuntu:20.04
+        - PROJECT_NAME=hdrpy
+        - PYTHON_VERSION=3.9.16
+        - UID=${HOST_UID-1000}
+        - GID=${HOST_GID-1000}
+    tty: true
+    restart: always
+    environment:
+      - TZ=Asia/Tokyo
+      - JUPYTER_PORT=8888
+      - JUPYTER_IP=0.0.0.0
+      - JUPYTER_NOTEBOOK_DIR=/hdrpy
+      - PROJECT_NAME=hdrpy
+    volumes:
+      - ../../../:/hdrpy
+    ports:
+      - 8888:8888
+

@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  hdrpy:
+    build:
+      context: ../../../
+      dockerfile: ./docker/rootless/Dockerfile
+      args:
+        - BASE_IMAGE=ubuntu:20.04
+        - PROJECT_NAME=hdrpy
+        - PYTHON_VERSION=3.9.16
+    tty: true
+    restart: always
+    environment:
+      - TZ=Asia/Tokyo
+      - JUPYTER_IP=0.0.0.0
+      - JUPYTER_PORT=8888
+      - JUPYTER_NOTEBOOK_DIR=/hdrpy
+      - PROJECT_NAME=hdrpy
+    volumes:
+      - ../../../:/hdrpy
+    ports:
+      - 8888:8888
+

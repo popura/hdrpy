@@ -4,6 +4,13 @@ version = "0.1.0"
 description = "A package for handling high dynamic range (HDR) images with Python."
 authors = ["Yuma Kinoshita"]
 license = "MIT"
+packages = [
+  {include = "io", from = "src"},
+  {include = "format", from = "src},
+  {include = "generation", from = "src},
+  {include = "tmo", from = "src},
+  {include = "mef", from = "src},
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
